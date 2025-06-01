@@ -1,8 +1,8 @@
 // ==UserScript== 
-// @name        广告链接双引擎终极绕行器 
+// @name        Roblox执行器key bypass—双引擎
 // @namespace   https://github.com/ding360/Roblox-key-/new/main
-// @version     1.20 
-// @description 双引擎广告链接绕过 + 人机验证破解 
+// @version     1.20
+// @description bypass.city|voltar.lol双引擎执行器key链接绕过
 // @author      https://github.com/ding360
 // @match       *://*/*
 // @grant       GM_xmlhttpRequest 
