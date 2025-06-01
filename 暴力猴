@@ -3,7 +3,7 @@
 // @namespace   https://github.com/ding360/Roblox-key-/new/main
 // @version     1.20 
 // @description 双引擎广告链接绕过 + 人机验证破解 
-// @author      YourName 
+// @author      https://github.com/ding360
 // @match       *://*/*
 // @grant       GM_xmlhttpRequest 
 // @grant       GM_notification 
@@ -16,6 +16,7 @@
 // @require     https://code.jquery.com/jquery-3.6.0.min.js  
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js  
 // @icon        https://i.imgur.com/Sdq7sWW.png  
+// @downloadURL https://github.com/ding360/Roblox-key-/edit/main/%E6%9A%B4%E5%8A%9B%E7%8C%B4
 // @updateURL   https://github.com/ding360/Roblox-key-/edit/main/%E6%9A%B4%E5%8A%9B%E7%8C%B4
 /* 匹配域名列表（同原脚本） */
 // ==/UserScript==
