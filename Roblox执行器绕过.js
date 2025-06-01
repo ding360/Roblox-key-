@@ -16,8 +16,8 @@
 // @require     https://code.jquery.com/jquery-3.6.0.min.js  
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js  
 // @icon        https://i.imgur.com/Sdq7sWW.png  
-// @downloadURL https://github.com/ding360/Roblox-key-/blob/9c62677fc1b0c6b0a47fec61a113d0594dbb66f9/%E6%9A%B4%E5%8A%9B%E7%8C%B4
-// @updateURL   https://github.com/ding360/Roblox-key-/blob/9c62677fc1b0c6b0a47fec61a113d0594dbb66f9/%E6%9A%B4%E5%8A%9B%E7%8C%B4
+// @downloadURL https://github.com/ding360/Roblox-key-/blob/59887b6c993ae7c3a1b146030a547af1fbad48fa/Roblox%E6%89%A7%E8%A1%8C%E5%99%A8%E7%BB%95%E8%BF%87.js
+// @updateURL   https://github.com/ding360/Roblox-key-/blob/59887b6c993ae7c3a1b146030a547af1fbad48fa/Roblox%E6%89%A7%E8%A1%8C%E5%99%A8%E7%BB%95%E8%BF%87.js
 /* 匹配域名列表（同原脚本） */
 // ==/UserScript==
  
