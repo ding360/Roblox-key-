@@ -592,6 +592,125 @@ const LUARMOR_BYPASS_ENGINES = [
       return null;
     }
   },
+ // 继承原有引擎 
+  ...ENGINES.map(engine  => ({
+    ...engine,
+    pattern: engine.pattern  || new RegExp(engine.domain  || '')
+  }))
+];
+
+/* ================= 高级反检测技术 ================= */
+function createStealthEnvironment() {
+  // 1. API通讯加密 
+  if (SECURITY.ANTI_DETECTION.API_ENCRYPTION) {
+    const originalXHROpen = XMLHttpRequest.prototype.open; 
+    XMLHttpRequest.prototype.open  = function(method, url) {
+      if (url.includes('luarmor.net/verify'))  {
+        arguments[1] = url.replace('verify',  'v2/proxy-verify');
+        console.log('[Stealth]  Encrypted API request');
+      }
+      originalXHROpen.apply(this,  arguments);
+    };
+  }
+ 
+  // 2. 浏览器指纹伪装 
+  if (SECURITY.ANTI_DETECTION.FAKE_FINGERPRINT) {
+    Object.defineProperty(navigator,  'webdriver', { get: () => false });
+    Object.defineProperty(navigator,  'plugins', {
+      get: () => [1, 2, 3].map(() => ({
+        name: 'PDF Viewer',
+        filename: 'internal-pdf-viewer'
+      }))
+    });
+    
+    const originalUserAgent = navigator.userAgent; 
+    Object.defineProperty(navigator,  'userAgent', {
+      get: () => {
+        const agents = [
+          `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${Math.floor(Math.random()  * 5) + 95}.0.${Math.floor(Math.random()  * 4000) + 1000}.0 Safari/537.36`,
+          `Mozilla/5.0 (Macintosh; Intel Mac OS X 12_${Math.floor(Math.random()  * 3)}_${Math.floor(Math.random()  * 3)}) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.${Math.floor(Math.random()  * 3)} Safari/605.1.15`
+        ];
+        return agents[Math.floor(Math.random() * agents.length)]; 
+      }
+    });
+  }
+ 
+  // 3. 定时器随机化 
+  if (SECURITY.ANTI_DETECTION.TIMING_RANDOMIZATION) {
+    const timerHandlers = [];
+    
+    const randomizer = (origFn, ...args) => {
+      const delay = args[1];
+      if (delay < 1000) {
+        args[1] = delay + Math.floor(Math.random()  * 300) - 150;
+      }
+      return origFn(...args);
+    };
+    
+    window.setTimeout  = new Proxy(window.setTimeout,  { apply: randomizer });
+    window.setInterval  = new Proxy(window.setInterval,  { apply: randomizer });
+  }
+}
+ 
+/* ================= 主控制系统 ================= */
+function initLuarmorBypass() {
+  if (/luarmor\.net/i.test(location.host))  {
+    GM_notification({
+      title: "Luarmor检测系统激活",
+      text: "高级绕过模式已启用",
+      timeout: 3000 
+    });
+    
+    createStealthEnvironment();
+    
+    // 实时DOM监控 
+    new MutationObserver((mutations) => {
+      mutations.forEach(mutation  => {
+        if (mutation.addedNodes)  {
+          mutation.addedNodes.forEach(node  => {
+            if (node.nodeType  === 1) {
+              if (node.matches('.security-wall,  .detection-layer')) {
+                node.remove(); 
+                console.log('[Luarmor]  Removed security layer');
+              }
+            }
+          });
+        }
+      });
+    }).observe(document, { childList: true, subtree: true });
+  }
+ 
+  // 激活原有系统 
+  initEnhancedSystem();
+  
+  // 添加Luarmor专属菜单 
+  GM_registerMenuCommand("Luarmor调试模式", () => {
+    unsafeWindow.enableDebug  = true;
+    console.info("Luarmor 调试模式激活");
+  });
+}
+ 
+/* ================= 执行入口 ================= */
+(function() {
+  'use strict';
+  
+  // 前置安全初始化 
+  if (typeof $ !== 'undefined') {
+    $(document).ready(initLuarmorBypass);
+  } else {
+    document.addEventListener('DOMContentLoaded',  initLuarmorBypass);
+  }
+  
+  // 强制提前执行 
+  if (document.readyState  === 'loading') {
+    document.addEventListener('readystatechange',  () => {
+      if (document.readyState  === 'interactive') {
+        initLuarmorBypass();
+      }
+    });
+  }
+})();
+ 
 // ========== 主初始化函数 ==========
 function initAllSystems() {
   // 初始化广告绕过系统
