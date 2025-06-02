@@ -93,8 +93,8 @@
 // @require     https://code.jquery.com/jquery-3.6.0.min.js  
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js  
 // @icon        https://raw.githubusercontent.com/ding360/Roblox-key-/refs/heads/main/favicon.ico  
-// @downloadURL https://raw.githubusercontent.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
-// @updateURL   https://raw.githubusercontent.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
+// @downloadURL https://github.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
+// @updateURL   https://github.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
 // ==UserScript== 
 // 新增元数据指令 
 // @grant       GM_getValue 
