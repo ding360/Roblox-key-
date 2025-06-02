@@ -153,7 +153,7 @@ class UISystem {
         background:#1a1a2e;color:#fff;border-radius:15px;padding:15px;width:300px;
         box-shadow:0 5px 25px rgba(0,0,0,0.3);font-family:'Segoe UI',sans-serif">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <h3 style="margin:0;color:#64ffda">🔗 链接绕行器</h3>
+          <h3 style="margin:0;color:#64ffda">🔗 link key bypass</h3>
           <span id="panel-close" style="cursor:pointer;font-size:20px">&times;</span>
         </div>
         
@@ -167,13 +167,13 @@ class UISystem {
         </div>
         
         <div class="url-input" style="margin-bottom:15px">
-          <label style="display:block;margin-bottom:5px;font-size:13px">输入广告链接:</label>
+          <label style="display:block;margin-bottom:5px;font-size:13px">输入key link:</label>
           <input id="ad-url-input" type="text" style="width:100%;padding:8px;background:#16213e;color:#fff;border:1px solid #0d7377;border-radius:5px">
         </div>
         
         <button id="process-btn" style="width:100%;padding:10px;background:#0d7377;color:white;border:none;
           border-radius:25px;font-weight:bold;cursor:pointer;transition:all 0.3s">
-          🚀 解析真实链接 
+          🚀 解析链接link 
         </button>
         
         <div id="result-container" style="margin-top:15px;display:none">
@@ -208,7 +208,7 @@ class UISystem {
  
   static async processLink() {
     const adUrl = $('#ad-url-input').val().trim();
-    if (!adUrl) return this._showToast('⚠️ 请输入广告链接');
+    if (!adUrl) return this._showToast('⚠️ 请输入链接link');
     
     $('#process-btn').html('🔄 解析中...').prop('disabled', true);
     
@@ -226,7 +226,7 @@ class UISystem {
     } catch (e) {
       this._showToast('⚠️ 解析出错: ' + e.message); 
     } finally {
-      $('#process-btn').html('🚀 解析真实链接').prop('disabled', false);
+      $('#process-btn').html('🚀 解析链接link').prop('disabled', false);
     }
   }
   
