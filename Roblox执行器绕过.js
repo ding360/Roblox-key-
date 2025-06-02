@@ -18,6 +18,105 @@
 // @icon        https://raw.githubusercontent.com/ding360/Roblox-key-/refs/heads/main/favicon.ico  
 // @downloadURL https://raw.githubusercontent.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
 // @updateURL   https://raw.githubusercontent.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
+// ==UserScript== 
+// 新增元数据指令 
+// @grant       GM_getValue 
+// @grant       GM_setValue 
+// @grant       GM_registerMenuCommand 
+// ==/UserScript==
+ 
+/* ========== 更新管理模块 ========== */
+const UPDATE_CONFIG = {
+  metaURL: "https://yourdomain.com/path/to/meta.user.js", 
+  changeLogURL: "https://yourdomain.com/changelog", 
+  autoCheck: true,
+  checkInterval: 24 * 60 * 60 * 1000, // 24小时检查一次 
+  debugMode: false 
+};
+ 
+// 主更新函数 
+async function handleScriptUpdate() {
+  if (!UPDATE_CONFIG.autoCheck)  return;
+  
+  const lastCheck = GM_getValue("lastUpdateCheck", 0);
+  const currentTime = Date.now(); 
+  
+  // 检查更新间隔 
+  if (currentTime - lastCheck > UPDATE_CONFIG.checkInterval)  {
+    try {
+      const metaData = await fetchMetaData();
+      const remoteVersion = parseVersion(metaData);
+      const localVersion = parseVersion(GM_info.script.version); 
+      
+      if (compareVersions(remoteVersion, localVersion) > 0) {
+        showUpdateNotification(remoteVersion);
+      }
+      
+      GM_setValue("lastUpdateCheck", currentTime);
+    } catch (e) {
+      if (UPDATE_CONFIG.debugMode)  console.error(" 更新检查失败:", e);
+    }
+  }
+}
+ 
+// 获取元数据 
+async function fetchMetaData() {
+  const response = await fetch(UPDATE_CONFIG.metaURL,  {
+    cache: "no-cache",
+    headers: { "Pragma": "no-cache" }
+  });
+  return await response.text(); 
+}
+ 
+// 解析版本号 
+function parseVersion(versionStr) {
+  const match = versionStr.match(/@version\s+([\d.]+)/); 
+  return match ? match[1].split('.').map(Number) : [0];
+}
+ 
+// 版本比较函数 
+function compareVersions(v1, v2) {
+  for (let i = 0; i < Math.max(v1.length,  v2.length);  i++) {
+    const part1 = v1[i] || 0;
+    const part2 = v2[i] || 0;
+    if (part1 > part2) return 1;
+    if (part1 < part2) return -1;
+  }
+  return 0;
+}
+ 
+// 更新通知 
+function showUpdateNotification(newVersion) {
+  GM_notification({
+    title: "脚本更新可用",
+    text: `检测到新版 ${newVersion.join('.')} ，点击查看更新详情`,
+    image: "https://yourdomain.com/update-icon.png", 
+    onclick: () => window.open(UPDATE_CONFIG.changeLogURL) 
+  });
+  
+  // 添加右上角提示 
+  const updateBadge = document.createElement('div'); 
+  updateBadge.innerHTML  = '🔄';
+  updateBadge.title  = "有新版本可用，点击查看详情";
+  Object.assign(updateBadge.style,  {
+    position: 'fixed',
+    top: '10px',
+    right: '10px',
+    fontSize: '24px',
+    cursor: 'pointer',
+    zIndex: 10000 
+  });
+  updateBadge.addEventListener('click',  () => {
+    window.open(UPDATE_CONFIG.changeLogURL); 
+  });
+  document.body.appendChild(updateBadge); 
+}
+ 
+// 添加手动检查菜单 
+GM_registerMenuCommand("手动检查更新", () => {
+  GM_setValue("lastUpdateCheck", 0);
+  handleScriptUpdate();
+});
 /* 匹配域名列表（同原脚本） */
 /* ========== Roblox相关域名 ========== */
 // @match *://*.roblox.com/* 
