@@ -19,6 +19,12 @@
 // @downloadURL https://github.com/ding360/Roblox-key-/blob/59887b6c993ae7c3a1b146030a547af1fbad48fa/Roblox%E6%89%A7%E8%A1%8C%E5%99%A8%E7%BB%95%E8%BF%87.js
 // @updateURL   https://github.com/ding360/Roblox-key-/blob/59887b6c993ae7c3a1b146030a547af1fbad48fa/Roblox%E6%89%A7%E8%A1%8C%E5%99%A8%E7%BB%95%E8%BF%87.js
 /* 匹配域名列表（同原脚本） */
+/* ========== Roblox相关域名 ========== */
+// @match *://*.roblox.com/* 
+// @match *://*.rbxcdn.com/* 
+// @match *://*.rbx.gg/* 
+// @exclude *://*.roblox.com/build/* 
+// @exclude *://*.roblox.com/develop/library/* 
 // ==/UserScript==
  
 /********************** 全局配置 **********************/
@@ -30,6 +36,166 @@ const CONFIG = {
   BYPASS_CITY_API: "https://bypass.city/api/v4",   // 更新API地址 
   VOLTAR_API: "https://api.voltar.lol/v1/bypass" 
 };
+
+// ========== 核心配置 ==========
+const CONFIG = {
+  // 广告绕过配置 
+  bypassEngines: [
+    {
+      name: "bypass_city",
+      url: "https://bypass.city/api", 
+      method: "POST",
+      parser: function(response) {
+        try {
+          return JSON.parse(response).direct_url  || null;
+        } catch {
+          return fallbackParser(response);
+        }
+      }
+    },
+    {
+      name: "voltar_lol",
+      url: "https://voltar.lol/", 
+      method: "GET",
+      parser: function(response) {
+        const metaRefresh = response.match(/<meta  http-equiv="refresh" content=".*url=(.*?)"/i);
+        return metaRefresh?.[1] ? decodeURIComponent(metaRefresh[1]) : null;
+      }
+    }
+  ],
+  
+  // Roblox绕过配置
+  robloxHooks: {
+    antiCheat: true,      // 绕过反作弊检测 
+    executorDetection: true, // 绕过执行器检测
+    fpsUnlock: true,      // FPS解锁 
+    telemetryBlock: true  // 阻止遥测数据
+  },
+  
+  // 验证码破解配置
+  captchaServices: {
+    YES_CAPTCHA: {
+      api_key: "YOUR_API_KEY", // 需到 yescaptcha.com  申请
+      endpoint: "https://api.yescaptcha.com/createTask" 
+    }
+  }
+};
+ 
+// ========== ROBLOX 绕过系统 ==========
+class RobloxBypass {
+  constructor() {
+    this.originalFunctions  = new Map();
+    this.isInjecting  = false;
+  }
+  
+  init() {
+    if (!this.isRobloxDomain())  return;
+    
+    if (CONFIG.robloxHooks.antiCheat)  this.hookAntiCheat(); 
+    if (CONFIG.robloxHooks.executorDetection)  this.disableExecutorDetection(); 
+    if (CONFIG.robloxHooks.fpsUnlock)  this.unlockFPS(); 
+    if (CONFIG.robloxHooks.telemetryBlock)  this.blockTelemetry(); 
+    
+    this.hookConsoleMessages(); 
+    this.cleanupEnvironment(); 
+    
+    console.log("[Roblox  Bypass] 系统初始化完成");
+    GM_notification({
+      title: "Roblox 绕过激活",
+      text: `已启用 ${Object.keys(CONFIG.robloxHooks).filter(k  => CONFIG.robloxHooks[k]).length}  项保护功能`,
+      timeout: 3000 
+    });
+  }
+  
+  isRobloxDomain() {
+    return /\.roblox\.com|\.rbxcdn\.com|\.rbx\.gg/i.test(location.hostname); 
+  }
+ 
+  // 绕过反作弊检测
+  hookAntiCheat() {
+    this.hookFunction('GameDetector',  () => {});
+    this.hookFunction('AntiExploit',  () => {});
+    this.hookFunction('MemoryScanner',  () => false);
+  }
+  
+  // 禁用执行器检测
+  disableExecutorDetection() {
+    const injectScript = () => {
+      const script = document.createElement('script'); 
+      script.textContent  = `
+        window.console.log  = window.console.debug; 
+        window.isExecutor  = false;
+        window.require  = window.require  || function() {};
+        window.__TEMPORARY_DEVICE_CONSOLE__ = {};
+        Object.defineProperty(navigator,  'webdriver', { get: () => false });
+      `;
+      document.documentElement.appendChild(script); 
+      script.remove(); 
+    };
+    
+    document.addEventListener('DOMContentLoaded',  injectScript);
+    if (document.readyState  === 'complete' || document.readyState  === 'interactive') {
+      setTimeout(injectScript, 1000);
+    }
+  }
+  
+  // FPS解锁 
+  unlockFPS() {
+    this.hookFunction('SetFPSCap',  (original, cap) => {
+      return original.call(this,  Math.max(cap,  240));
+    });
+  }
+  
+  // 阻止遥测数据
+  blockTelemetry() {
+    const blockedEndpoints = [
+      'telemetry.roblox.com', 
+      'ecs.roblox.com', 
+      'client-telemetry.roblox.com' 
+    ];
+    
+    const originalSend = XMLHttpRequest.prototype.send; 
+    XMLHttpRequest.prototype.send  = function(body) {
+      if (blockedEndpoints.some(ep  => this._url.includes(ep)))  {
+        console.log(`[ 拦截遥测] ${this._url}`);
+        return;
+      }
+      originalSend.call(this,  body);
+    };
+  }
+  
+  // 钩子函数系统 
+  hookFunction(funcName, override) {
+    const context = window.gameBridge  || window;
+    if (!context[funcName]) return;
+    
+    if (!this.originalFunctions.has(funcName))  {
+      this.originalFunctions.set(funcName,  context[funcName]);
+    }
+    
+    context[funcName] = function(...args) {
+      return override(this.originalFunctions.get(funcName),  ...args);
+    }.bind(this);
+  }
+  
+  // 清理环境 
+  cleanupEnvironment() {
+    ['__SECURITY_CONTEXT', '__IS_EXECUTOR', '__EXPLOIT_DETECTED'].forEach(prop => {
+      delete window[prop];
+    });
+  }
+  
+  // 控制台消息钩子
+  hookConsoleMessages() {
+    const originalLog = console.log; 
+    console.log  = function(...args) {
+      if (typeof args[0] === 'string' && args[0].includes('Executor detected')) {
+        return; // 屏蔽执行器检测消息 
+      }
+      originalLog.apply(console,  args);
+    };
+  }
+}
  
 /********************** 引擎系统 **********************/
 class BypassEngine {
@@ -138,8 +304,126 @@ class BypassEngine {
     });
   }
 }
+
+// ========== 主初始化函数 ==========
+function initAllSystems() {
+  // 初始化广告绕过系统
+  initBypassSystem();
+  
+  // 初始化Roblox绕过系统 
+  const robloxBypass = new RobloxBypass();
+  robloxBypass.init(); 
+  
+  // 添加样式 
+  addCustomStyles();
+  
+  // 创建控制面板
+  createControlPanel();
+}
  
-/********************** 用户界面系统 **********************/
+// ========== 控制面板 ==========
+function createControlPanel() {
+  const panel = document.createElement('div'); 
+  panel.id  = 'bypass-control-panel';
+  panel.innerHTML  = `
+    <div class="panel-header">
+      <h3>全能助手控制面板</h3>
+      <span class="close-btn">×</span>
+    </div>
+    <div class="panel-body">
+      <div class="module">
+        <h4>广告绕过系统</h4>
+        <button id="scan-links">扫描广告链接</button>
+        <button id="bypass-all">全部绕过</button>
+      </div>
+      <div class="module">
+        <h4>Roblox 绕过</h4>
+        <label>
+          <input type="checkbox" id="anti-cheat" checked> 反作弊绕过 
+        </label>
+        <label>
+          <input type="checkbox" id="executor-detect" checked> 执行器检测绕过 
+        </label>
+        <label>
+          <input type="checkbox" id="fps-unlock" checked> FPS解锁 
+        </label>
+      </div>
+      <div class="module">
+        <h4>验证码破解</h4>
+        <select id="captcha-service">
+          <option value="yescaptcha">YesCaptcha (推荐)</option>
+          <option value="self">自主破解</option>
+        </select>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button id="save-settings">保存设置</button>
+    </div>
+  `;
+  
+  // 样式和事件绑定...
+  document.body.appendChild(panel); 
+}
+ 
+// ========== 样式函数 ==========
+function addCustomStyles() {
+  const style = document.createElement('style'); 
+  style.textContent  = `
+    #bypass-control-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: rgba(20, 20, 30, 0.9);
+      color: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      width: 300px;
+      backdrop-filter: blur(10px);
+      border: 1px solid #4a6cf7;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #4a6cf7;
+    }
+    .panel-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .close-btn {
+      cursor: pointer;
+      font-size: 24px;
+    }
+    .module {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #333;
+    }
+    .module h4 {
+      margin-top: 0;
+      color: #4a6cf7;
+    }
+    #bypass-control-panel button {
+      background: #4a6cf7;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      margin: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    #bypass-control-panel button:hover {
+      background: #3a5bd9;
+      transform: translateY(-2px);
+    }
+    #bypass-floating-btn {
+}/********************** 用户界面系统 **********************/
 class UISystem {
   static init() {
     this._createFloatingPanel();
@@ -234,6 +518,23 @@ class UISystem {
     // 实现Toast提示...
   }
 }
+// ========== 启动脚本 ==========
+(function() {
+  'use strict';
+  
+  // 等待页面加载完成
+  if (document.readyState  === 'loading') {
+    document.addEventListener('DOMContentLoaded',  initAllSystems);
+  } else {
+    setTimeout(initAllSystems, 1000);
+  }
+  
+  // 添加右键菜单
+  GM.registerMenuCommand(" 打开控制面板", () => {
+    document.getElementById('bypass-control-panel').style.display  = 'block';
+  });
+})();
+ 
  
 /********************** 验证码破解系统 **********************/
 class CaptchaSolver {
