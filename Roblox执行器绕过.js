@@ -16,8 +16,8 @@
 // @require     https://code.jquery.com/jquery-3.6.0.min.js  
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js  
 // @icon        https://raw.githubusercontent.com/ding360/Roblox-key-/refs/heads/main/favicon.ico  
-// @downloadURL https://github.com/ding360/Roblox-key-/blob/59887b6c993ae7c3a1b146030a547af1fbad48fa/Roblox%E6%89%A7%E8%A1%8C%E5%99%A8%E7%BB%95%E8%BF%87.js
-// @updateURL   https://github.com/ding360/Roblox-key-/blob/59887b6c993ae7c3a1b146030a547af1fbad48fa/Roblox%E6%89%A7%E8%A1%8C%E5%99%A8%E7%BB%95%E8%BF%87.js
+// @downloadURL https://raw.githubusercontent.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
+// @updateURL   https://raw.githubusercontent.com/ding360/Roblox-key-/edit/main/Roblox执行器绕过.js 
 /* 匹配域名列表（同原脚本） */
 /* ========== Roblox相关域名 ========== */
 // @match *://*.roblox.com/* 
@@ -423,6 +423,79 @@ function addCustomStyles() {
       transform: translateY(-2px);
     }
     #bypass-floating-btn {
+    // 在初始化函数中添加一个按钮
+function initBypassSystem() {
+  // 添加更新按钮
+  const updateBtn = document.createElement('div'); 
+  updateBtn.innerHTML  = '🔄';
+  Object.assign(updateBtn.style,  {
+    position: 'fixed',
+    bottom: '70px',
+    right: '20px',
+    zIndex: 9999,
+    background: '#28a745',
+    color: 'white',
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+  });
+  updateBtn.addEventListener('click',  checkForUpdate);
+  document.body.appendChild(updateBtn); 
+}
+
+// 检查更新函数
+function checkForUpdate() {
+  // 获取当前脚本信息
+  const scriptInfo = GM_info.script; 
+  const currentVersion = scriptInfo.version; 
+  const updateURL = scriptInfo.updateURL  || scriptInfo.downloadURL; 
+
+  if (!updateURL) {
+    alert('未配置更新URL');
+    return;
+  }
+
+  // 请求更新URL的脚本内容（注意：需要@connect权限）
+  GM_xmlhttpRequest({
+    method: 'GET',
+    url: updateURL,
+    onload: function(response) {
+      // 解析元数据块中的版本号
+      const versionMatch = response.responseText.match(/\/\/\s*@version\s+(\d+\.\d+)/); 
+      if (versionMatch && versionMatch[1]) {
+        const latestVersion = versionMatch[1];
+        if (compareVersions(latestVersion, currentVersion) > 0) {
+          if (confirm(`发现新版本 ${latestVersion}，是否前往安装？`)) {
+            window.open(updateURL); 
+          }
+        } else {
+          alert('已是最新版本！');
+        }
+      }
+    },
+    onerror: function() {
+      alert('更新检查失败');
+    }
+  });
+}
+
+// 版本号比较函数
+function compareVersions(v1, v2) {
+  const parts1 = v1.split('.').map(Number); 
+  const parts2 = v2.split('.').map(Number); 
+  for (let i = 0; i < Math.max(parts1.length,  parts2.length);  i++) {
+    const part1 = i < parts1.length  ? parts1[i] : 0;
+    const part2 = i < parts2.length  ? parts2[i] : 0;
+    if (part1 > part2) return 1;
+    if (part1 < part2) return -1;
+  }
+  return 0;
+}
 }/********************** 用户界面系统 **********************/
 class UISystem {
   static init() {
