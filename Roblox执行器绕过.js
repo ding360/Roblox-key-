@@ -1,10 +1,11 @@
 // ==UserScript== 
 // @name        Roblox执行器key bypass—双引擎
 // @namespace   https://github.com/ding360/
-// @version     1.20
+// @version     1.2.1
 // @description bypass.city|voltar.lol双引擎执行器key链接绕过
 // @author      https://github.com/ding360
 // @match       *://*/*
+// @match       *://luarmor.net/* 
 // @match        *://*.adshnk.com/*
 // @match        *://*.adshrink.it/*
 // @match        *://*.shrink-service.it/*
@@ -79,17 +80,6 @@
 // @connect     bypass.city  
 // @connect     voltar.lol  
 // @connect     api.yescaptcha.com  
-// @exclude      *://publisher.linkvertise.com/*
-// @exclude      *://linkvertise.com/adfly-notice*
-// @exclude      *://linkvertise.com/search*
-// @exclude      *://linkvertise.com/login*
-// @exclude      *://linkvertise.com/profile*
-// @exclude      *://blog.linkvertise.com
-// @exclude      *://blog.linkvertise.com/*
-// @exclude      *://linkvertise.com/assets/vendor/*
-// @exclude      *://publisher.linkvertise.com/*
-// @exclude      *://link-mutation.linkvertise.com/*
-// @exclude      *://linkvertise.com/assets/external/thinksuggest
 // @require     https://code.jquery.com/jquery-3.6.0.min.js  
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js  
 // @icon        https://raw.githubusercontent.com/ding360/Roblox-key-/refs/heads/main/favicon.ico  
@@ -194,16 +184,8 @@ GM_registerMenuCommand("手动检查更新", () => {
   GM_setValue("lastUpdateCheck", 0);
   handleScriptUpdate();
 });
-/* 匹配域名列表（同原脚本） */
-/* ========== Roblox相关域名 ========== */
-// @match *://*.roblox.com/* 
-// @match *://*.rbxcdn.com/* 
-// @match *://*.rbx.gg/* 
-// @exclude *://*.roblox.com/build/* 
-// @exclude *://*.roblox.com/develop/library/* 
-// ==/UserScript==
- 
-/********************** 全局配置 **********************/
+{
+}/********************** 全局配置 **********************/
 const CONFIG = {
   ENGINE_PRIORITY: ["bypass_city", "voltar_lol"], // 引擎使用顺序 
   CACHE_ENABLED: true,                            // 启用结果缓存 
@@ -480,7 +462,136 @@ class BypassEngine {
     });
   }
 }
-
+{
+}/* ================= 核心安全配置 ================= */
+const SECURITY = {
+  ANTI_DETECTION: {
+    PROXY_ROTATION: true,
+    FAKE_FINGERPRINT: true,
+    TIMING_RANDOMIZATION: true,
+    API_ENCRYPTION: true 
+  },
+  LUARMOR_BYPASS: {
+    // Luarmor专有绕过技术 
+    DEBUGGER_TRAP: true,
+    HONEYPOT_DETECTION: true,
+    VM_INTEGRITY_CHECK: true 
+  }
+};
+{
+}/* ================= Luarmor绕过模块 ================= */
+(function() {
+  'use strict';
+ 
+  // 1. 反调试陷阱绕过 
+  if (SECURITY.LUARMOR_BYPASS.DEBUGGER_TRAP) {
+    const debuggerHandler = {
+      apply: function(target, thisArg, argumentsList) {
+        console.log('[Luarmor  Bypass] Debugger trap neutralized');
+        return false;
+      }
+    };
+    
+    const debuggerProxy = new Proxy(window.debugger,  debuggerHandler);
+    Object.defineProperty(window,  'debugger', {
+      value: debuggerProxy,
+      configurable: false,
+      writable: false 
+    });
+  }
+ 
+  // 2. 虚拟环境检测绕过 
+  if (SECURITY.LUARMOR_BYPASS.VM_INTEGRITY_CHECK) {
+    const fakePerformance = {
+      timing: { navigationStart: Date.now()  },
+      getEntriesByType: () => [],
+      memory: { jsHeapSizeLimit: 4294705152 }
+    };
+    
+    Object.defineProperty(window,  'performance', {
+      value: fakePerformance,
+      configurable: false,
+      writable: false 
+    });
+ 
+    // WebGL渲染器伪装 
+    const getParameter = WebGLRenderingContext.prototype.getParameter; 
+    WebGLRenderingContext.prototype.getParameter  = function(pname) {
+      if (pname === 37445) return 'Google Inc. (NVIDIA)';
+      if (pname === 37446) return 'ANGLE (NVIDIA, NVIDIA GeForce RTX 3080 Direct3D11 vs_5_0 ps_5_0)';
+      return getParameter.call(this,  pname);
+    };
+  }
+ 
+  // 3. 蜜罐检测规避 
+  if (SECURITY.LUARMOR_BYPASS.HONEYPOT_DETECTION) {
+    const elementProto = Element.prototype; 
+    const originalAddEventListener = elementProto.addEventListener; 
+    
+    elementProto.addEventListener  = function(type, listener, options) {
+      // 过滤蜜罐事件监听 
+      const forbiddenEvents = [
+        'DOMNodeInserted', 
+        'securityscan', 
+        'integritycheck'
+      ];
+      
+      if (!forbiddenEvents.includes(type))  {
+        originalAddEventListener.call(this,  type, listener, options);
+      } else {
+        console.log(`[Luarmor  Bypass] Blocked honeypot event: ${type}`);
+      }
+    };
+ 
+    // 检测并绕过属性监测 
+    const observerCallback = function(mutationsList) {
+      for (const mutation of mutationsList) {
+        if (mutation.attributeName?.startsWith('data-integrity'))  {
+          mutation.target.setAttribute('data-integrity',  'verified');
+        }
+      }
+    };
+    
+    new MutationObserver(observerCallback)
+      .observe(document.documentElement,  {
+        attributes: true,
+        attributeFilter: ['data-integrity', 'security']
+      });
+  }
+})();
+{
+}/* ================= 广告破解增强引擎 ================= */
+const LUARMOR_BYPASS_ENGINES = [
+  {
+    name: "luarmor_xpath",
+    pattern: /luarmor\.net/i,
+    parser: function(doc = document) {
+      try {
+        // Luarmor专有解构器 
+        const iframe = doc.querySelector('iframe#secure-frame'); 
+        if (iframe && iframe.contentDocument)  {
+          const hiddenInput = iframe.contentDocument.querySelector('input[name="secured-token"]'); 
+          if (hiddenInput) {
+            return `https://direct.${location.host}/access/${hiddenInput.value}`; 
+          }
+        }
+        
+        // 备用解析方案 
+        const scriptBlocks = Array.from(doc.querySelectorAll('script')); 
+        const dataScript = scriptBlocks.find(script  => 
+          script.textContent.includes('redirectAfterVerification') 
+        );
+        
+        if (dataScript) {
+          const urlMatch = dataScript.textContent.match(/url:\s*'(https:\/\/[^']+)'/); 
+          return urlMatch ? urlMatch[1] : null;
+        }
+      } catch (e) {
+        console.error('[Luarmor]  Parser error:', e);
+      }
+      return null;
+    }
+  },
 // ========== 主初始化函数 ==========
 function initAllSystems() {
   // 初始化广告绕过系统
@@ -783,14 +894,8 @@ class UISystem {
     document.getElementById('bypass-control-panel').style.display  = 'block';
   });
 })();
- 
- 
-/********************** 验证码破解系统 **********************/
-class CaptchaSolver {
-  // ...保留原有验证码破解功能并增强...
-}
- 
-/********************** 自动检测系统 **********************/
+ {
+}/********************** 自动检测系统 **********************/
 class AutoDetectSystem {
   static init() {
     this._monitorPageChanges();
